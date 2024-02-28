@@ -1,16 +1,21 @@
 class ProductModel {
   String? name;
   String? price;
-  String? barcode;
+  String? image;
 
-  ProductModel({required this.name, required this.price});
+  ProductModel({required this.name, required this.price, required this.image});
 
   ProductModel.fromJson(Map<String, dynamic> json) {
     name = json["name"];
+    image = json["image"];
+
     price = json["price"];
-    barcode = json["barcode"];
   }
   Map<String, dynamic> toMap() {
-    return {'name': name, 'price': price, 'barcode': barcode};
+    return {
+      'image': image,
+      'name': name,
+      'price': price,
+    };
   }
 }
