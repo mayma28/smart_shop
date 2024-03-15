@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:provider/provider.dart';
-import 'package:smartshop/provider/cartItem.dart';
+import 'package:smartshop/provider/cart_prov.dart';
 import 'package:smartshop/screen/cartscreen.dart';
 import '../models/product_model.dart';
 
@@ -14,8 +14,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<bool> _selected = [false, false];
   ProductModel? productModel;
+  List<ProductModel> items = [];
 
   Future<void> _scanBarcode() async {
     try {
@@ -71,7 +71,7 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       body: SingleChildScrollView(
-        physics: NeverScrollableScrollPhysics(),
+        physics: const NeverScrollableScrollPhysics(),
         child: Column(
           children: [
             Row(
@@ -88,16 +88,28 @@ class _HomePageState extends State<HomePage> {
                     image: AssetImage('assets/images/logo.png'),
                   ),
                 ),
-                IconButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (BuildContext context) => const CartScreen(),
-                      ),
-                    );
-                  },
-                  icon: const Icon(Icons.shopping_cart_outlined, size: 37),
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.local_mall, size: 37),
+                      onPressed: () => {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) {
+                              return const CartScreen();
+                            },
+                          ),
+                        )
+                      },
+                    ),
+                    Padding(
+                        padding: const EdgeInsets.only(right: 10),
+                        child: Consumer<CartProvider>(
+                          builder: (context, cart, child) {
+                            return Text("${cart.count}");
+                          },
+                        ))
+                  ],
                 ),
               ],
             ),
@@ -117,96 +129,85 @@ class _HomePageState extends State<HomePage> {
               child: Column(
                 children: [
                   SizedBox(
-                    height: 300,
-                    width: 150,
-                    child: Column(
+                    height: 295,
+                    child: GridView.count(
+                      crossAxisCount: 1,
                       children: <Widget>[
                         if (productModel != null)
-                          Column(
-                            children: [
-                              Image.network(productModel!.image!, height: 200),
-                              Text.rich(
-                                TextSpan(
+                          Card(
+                            child: Consumer<CartProvider>(
+                              builder: (context, cart, child) {
+                                return Column(
                                   children: [
-                                    const TextSpan(
-                                      text: 'Nom : ',
-                                      style: TextStyle(
-                                        fontSize: 20,
-                                        fontStyle: FontStyle.italic,
+                                    Image.network(productModel!.image!,
+                                        height: 200),
+                                    Text.rich(
+                                      TextSpan(
+                                        children: [
+                                          const TextSpan(
+                                            text: 'Nom : ',
+                                            style: TextStyle(
+                                              fontSize: 20,
+                                              fontStyle: FontStyle.italic,
+                                            ),
+                                          ),
+                                          TextSpan(
+                                              style: const TextStyle(
+                                                fontSize: 20,
+                                                fontStyle: FontStyle.italic,
+                                              ),
+                                              text: productModel!
+                                                  .name!), // Add null check
+                                        ],
                                       ),
                                     ),
-                                    TextSpan(
-                                        style: const TextStyle(
-                                          fontSize: 20,
-                                          fontStyle: FontStyle.italic,
-                                        ),
-                                        text: productModel!
-                                            .name!), // Add null check
-                                  ],
-                                ),
-                              ),
-                              // const SizedBox(
-                              //   height: 10,
-                              // ),
-                              Text.rich(
-                                TextSpan(
-                                  children: [
-                                    const TextSpan(
-                                      text: 'Prix : ',
-                                      style: TextStyle(
-                                        fontSize: 20,
-                                        fontStyle: FontStyle.italic,
+                                    Text.rich(
+                                      TextSpan(
+                                        children: [
+                                          const TextSpan(
+                                            text: 'Prix : ',
+                                            style: TextStyle(
+                                              fontSize: 20,
+                                              fontStyle: FontStyle.italic,
+                                            ),
+                                          ),
+                                          TextSpan(
+                                            style: const TextStyle(
+                                              fontSize: 20,
+                                              fontStyle: FontStyle.italic,
+                                            ),
+                                            text:
+                                                productModel!.price!.toString(),
+                                          ), // Add null check
+                                        ],
                                       ),
                                     ),
-                                    TextSpan(
-                                        style: const TextStyle(
-                                          fontSize: 20,
-                                          fontStyle: FontStyle.italic,
+                                    Column(
+                                      children: [
+                                        Container(
+                                          alignment: Alignment.bottomRight,
+                                          child: IconButton(
+                                            onPressed: () =>
+                                                {cart.add(productModel!, 1)},
+                                            icon: const Icon(Icons
+                                                .add_shopping_cart_outlined),
+                                          ),
                                         ),
-                                        text: productModel!
-                                            .price!), // Add null check
+                                      ],
+                                    )
                                   ],
-                                ),
-                              ),
-                            ],
+                                );
+                              },
+                            ),
                           ),
                       ],
                     ),
                   ),
-                  ToggleButtons(
-                    isSelected: _selected,
-                    onPressed: (index) {
-                      setState(
-                        () {
-                          for (var i = 0; i < _selected.length; i++) {
-                            if (i == index) {
-                              _selected[i] = true;
-                            } else {
-                              _selected[i] = false;
-                            }
-                          }
-                          // addToCart(context, productModel);
-                        },
-                      );
-                    },
-                    children: const [
-                      Icon(
-                        Icons.close,
-                        color: Colors.red,
-                        size: 35,
-                      ),
-                      Icon(
-                        Icons.done,
-                        color: Colors.green,
-                        size: 35,
-                      ),
-                    ],
-                  )
                 ],
               ),
             ),
             Container(
-              margin: const EdgeInsets.symmetric(vertical: 120.0),
+              margin: const EdgeInsets.symmetric(vertical: 176.0),
               child: Column(
                 children: [
                   Container(
@@ -227,7 +228,7 @@ class _HomePageState extends State<HomePage> {
                               color: Colors.white, size: 35),
                         ),
                         IconButton(
-                          onPressed: () => HomePage(),
+                          onPressed: () => const HomePage(),
                           icon: const Icon(
                             Icons.home,
                             color: Colors.white,
@@ -268,9 +269,4 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-
-  // void addToCart(context, ProductModel) {
-  //   CartItem cartItem = Provider.of<CartItem>(context);
-  //   cartItem.addProduct(productModel!);
-  // }
 }

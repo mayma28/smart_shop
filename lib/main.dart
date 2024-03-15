@@ -1,6 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
-import 'package:smartshop/provider/cartItem.dart';
+import 'package:smartshop/provider/cart_prov.dart';
 import 'package:smartshop/screen/cartscreen.dart';
 import 'firebase_options.dart';
 import 'package:flutter/material.dart';
@@ -20,15 +20,20 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      routes: {
-        /*  "signup": (context) => SignUpPage(),
-        "login": (context) => LoginPage(),*/
-        "homepage": (context) => const HomePage(),
-        "cart": (context) => const CartScreen(),
+    return ChangeNotifierProvider(
+      create: (context) {
+        return CartProvider();
       },
-      home: const HomePage(),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        routes: {
+          /*  "signup": (context) => SignUpPage(),
+        "login": (context) => LoginPage(),*/
+          "homepage": (context) => const HomePage(),
+          "cart": (context) => const CartScreen(),
+        },
+        home: const HomePage(),
+      ),
     );
   }
 }
