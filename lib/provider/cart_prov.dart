@@ -3,82 +3,62 @@ import 'package:smartshop/models/cart_model.dart';
 import 'package:smartshop/models/product_model.dart';
 
 class CartProvider with ChangeNotifier {
-  List<ProductModel> _items = [];
   final List<CartModel> _cartItems = [];
+  double _totalPrice = 0.0;
+
   List<CartModel> get cartItems => _cartItems;
 
-  double price = 0;
- int quantity = 1;
-
-  void add(ProductModel item , int quantity) {
-    var isExist = _cartItems.where((element) => element.productModel.name == item.name);
-    if (isExist.isEmpty) {
-      _items.add(item);
-      price += item.price!;
-    } else
-      isExist.first.quantity += 1;
-    notifyListeners();
-  }
-
-  int getProductQuantity(int productId) {
-    int quantity = 0;
-    for (CartModel item in _cartItems) {
-      if (item.productModel == 1) {
-        quantity += item.quantity;
-      }
+  void add(ProductModel product, int quantity) {
+    // Check if the product already exists in the cart
+    int index =
+        _cartItems.indexWhere((item) => item.productModel.id == product.id);
+    if (index != -1) {
+      // If the product exists, update its quantity
+      _cartItems[index].quantity += quantity;
+    } else {
+      // If the product doesn't exist, add it to the cart
+      _cartItems.add(CartModel(productModel: product, quantity: quantity));
     }
-    return quantity;
+    _totalPrice += (product.price ?? 0.0) * quantity;
+    notifyListeners();
   }
 
-  void remove(ProductModel item) {
-    _items.remove(item);
-    price -= item.price!;
+  void remove(ProductModel product) {
+    // Find the index of the product in the cart
+    int index =
+        _cartItems.indexWhere((item) => item.productModel.id == product.id);
+    if (index != -1) {
+      // Subtract the price of the removed product from the total price
+      _totalPrice -= (product.price ?? 0.0) * _cartItems[index].quantity;
+      // Remove the product from the cart
+      _cartItems.removeAt(index);
+      notifyListeners();
+    }
+  }
+
+  void increaseQuantity(CartModel cartItems) {
+    cartItems.quantity++;
+    _totalPrice += cartItems.productModel.price ?? 0.0;
     notifyListeners();
+  }
+
+  void decreaseQuantity(CartModel cartItem) {
+    if (cartItem.quantity > 1) {
+      cartItem.quantity--;
+      _totalPrice -= cartItem.productModel.price ?? 0.0;
+      notifyListeners();
+    }
   }
 
   int get count {
-    return _items.length;
+    return _cartItems.length;
   }
 
   double get totalPrice {
-    return price;
+    return _totalPrice;
   }
-  void updateCartItemQuantity(int index, int newQuantity) {
-    if (index >= 0 && index < _cartItems.length) {
-      _cartItems[index].quantity = newQuantity;
-      notifyListeners();
-    }
-  }
-
-  void increaseCartItemQuantity(int index) {
-    if (index >= 0 && index < _cartItems.length) {
-      _cartItems[index].quantity++;
-      notifyListeners();
-    }
-  }
-
-  void decreaseCartItemQuantity(int index) {
-    if (index >= 0 && index < _cartItems.length) {
-      if (_cartItems[index].quantity > 1) {
-        _cartItems[index].quantity--;
-        notifyListeners();
-      } else {
-        // If the quantity is 1, remove the item from the cart
-        _cartItems.removeAt(index);
-        notifyListeners();
-      }
-    }
-  }
-  
 
   List<ProductModel> get cartItem {
-    return _items;
+    return _cartItems.map((cartModel) => cartModel.productModel).toList();
   }
 }
-
-
-
-
-
-
-

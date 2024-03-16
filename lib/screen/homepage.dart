@@ -188,7 +188,7 @@ class _HomePageState extends State<HomePage> {
                                           alignment: Alignment.bottomRight,
                                           child: IconButton(
                                             onPressed: () =>
-                                                {cart.add(productModel!, 1)},
+                                                {Provider.of<CartProvider>(context, listen: false).add(productModel!, 1)},
                                             icon: const Icon(Icons
                                                 .add_shopping_cart_outlined),
                                           ),
