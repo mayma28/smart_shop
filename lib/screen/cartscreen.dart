@@ -17,6 +17,7 @@ class CartScreen extends StatefulWidget {
 
 class _CartScreenState extends State<CartScreen> {
   int quantity = 1;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -83,98 +84,53 @@ class _CartScreenState extends State<CartScreen> {
               children: [
                 Container(
                   margin: EdgeInsets.symmetric(vertical: 5),
-                  padding: EdgeInsets.all(20),
+                  padding: EdgeInsets.all(10),
                   height: 350,
                   width: MediaQuery.of(context).size.width,
                   decoration:
                       BoxDecoration(borderRadius: BorderRadius.circular(10)),
                   child: Consumer<CartProvider>(
-                    builder: (context, cart, child) => cart.cartItem.length == 0
-                        ? const Center(
-                            child: Text(
-                              "Votre panier est vide",
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontStyle: FontStyle.italic,
+                      builder: (context, cart, child) => cart.cartItem.length ==
+                              0
+                          ? const Center(
+                              child: Text(
+                                "Votre panier est vide",
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontStyle: FontStyle.italic,
+                                ),
                               ),
-                            ),
-                          )
-                        : ListView.builder(
-                            physics: const AlwaysScrollableScrollPhysics(),
-                            scrollDirection: Axis.vertical,
-                            itemCount: cart.cartItem.length,
-                            itemBuilder: (context, i) {
-                              return Row(
-                                children: [
-                                  Container(
-                                    height: 60,
-                                    width: 50,
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFD4DCF7),
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: Image.network(
-                                      "${cart.cartItem[i].image}",
-                                      height: 60,
-                                      width: 60,
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding:
-                                        EdgeInsets.only(left: 6, bottom: 10),
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceEvenly,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          "${cart.cartItem[i].name}",
-                                          style: const TextStyle(
-                                            color: Colors.black,
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 10),
-                                        Row(
-                                          children: [
-                                            const Text(
-                                              "Prix :",
-                                              style: TextStyle(
-                                                color: Colors.black,
-                                                fontSize: 17,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 10),
-                                            Text(
-                                              "${cart.cartItem[i].price} DT",
-                                              style: const TextStyle(
-                                                color: Colors.black,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  // Spacer(),
-                                  Column(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      IconButton(
-                                        onPressed: () {
-                                          cart.remove(cart.cartItem[i]);
-                                        },
-                                        icon: const Icon(Icons.delete,
-                                            color: Colors.grey),
+                            )
+                          : ListView.builder(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              scrollDirection: Axis.vertical,
+                              padding: EdgeInsets.symmetric(vertical: 8),
+                              itemCount: cart.cartItem.length,
+                              itemBuilder: (context, i) {
+                                return Column(
+                                  children: [
+                                    ListTile(
+                                      leading: Image.network(
+                                        "${cart.cartItem[i].image}",
+                                        height: 70,
+                                        width: 70,
                                       ),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.end,
-                                        // mainAxisSize: MainAxisSize.min,
+                                      title: Text(
+                                        "${cart.cartItem[i].name}",
+                                        style: const TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      subtitle: Text(
+                                        "Price: ${cart.cartItem[i].price} DT",
+                                        style: const TextStyle(
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                      trailing: Row(
+                                        mainAxisSize: MainAxisSize.min,
                                         children: [
                                           IconButton(
                                             icon: const Icon(Icons.remove),
@@ -199,13 +155,12 @@ class _CartScreenState extends State<CartScreen> {
                                           ),
                                         ],
                                       ),
-                                    ],
-                                  ),
-                                ],
-                              );
-                            },
-                          ),
-                  ),
+                                    ),
+                                    const Divider(),
+                                  ],
+                                );
+                              },
+                            )),
                 ),
                 const Divider(
                   color: Colors.black,
@@ -230,7 +185,7 @@ class _CartScreenState extends State<CartScreen> {
                             width: 10,
                           ),
                           Text(
-                            "${cart.totalPrice.toStringAsFixed(3)} DT",
+                            "${cart.totalprice.toStringAsFixed(3)} DT",
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.black,

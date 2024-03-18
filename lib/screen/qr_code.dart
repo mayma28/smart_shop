@@ -78,7 +78,7 @@ class _QRCodePageState extends State<QRCodePage> {
             Consumer<CartProvider>(
               builder: (context, cart, child) {
                 return PrettyQr(
-                  data: "${cart.totalPrice.toStringAsFixed(3)} DT",
+                  data: "${cart.totalprice.toStringAsFixed(3)} DT",
                   size: 300,
                 );
               },
@@ -117,7 +117,7 @@ class _QRCodePageState extends State<QRCodePage> {
                             width: 10,
                           ),
                           Text(
-                            "${cart.totalPrice.toStringAsFixed(3)} DT",
+                            "${cart.totalprice.toStringAsFixed(3)} DT",
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.black,
