@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:smartshop/screen/qr_code.dart';
 
 import '../provider/cart_prov.dart';
-import 'homepage.dart';
+import 'homescreen.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({
@@ -33,7 +33,7 @@ class _CartScreenState extends State<CartScreen> {
         ),
       ),
       body: SingleChildScrollView(
-        physics: NeverScrollableScrollPhysics(),
+        physics: const NeverScrollableScrollPhysics(),
         child: Column(
           children: [
             Row(
@@ -207,11 +207,14 @@ class _CartScreenState extends State<CartScreen> {
                   ),
                   child: MaterialButton(
                     onPressed: () {
-                      Navigator.push(context, MaterialPageRoute(
-                        builder: (context) {
-                          return QRCodePage();
-                        },
-                      ));
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) {
+                            return QRCodePage();
+                          },
+                        ),
+                      );
                     },
                     child: const Center(
                       child: Text(

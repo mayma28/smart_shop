@@ -3,5 +3,6 @@
     "cSpell.words": [
         "firestore",
         "produits"
-    ]
+    ],
+    "java.configuration.updateBuildConfiguration": "interactive"
 }

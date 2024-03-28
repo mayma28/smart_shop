@@ -3,7 +3,7 @@ import 'package:pretty_qr_code/pretty_qr_code.dart';
 import 'package:provider/provider.dart';
 
 import '../provider/cart_prov.dart';
-import 'homepage.dart';
+import 'homescreen.dart';
 
 class QRCodePage extends StatefulWidget {
   const QRCodePage({super.key});

@@ -2,16 +2,20 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:smartshop/provider/cart_prov.dart';
 import 'package:smartshop/screen/cartscreen.dart';
+import 'package:smartshop/screen/splashscreen.dart';
+import 'package:smartshop/screen/users/login/loginscreen.dart';
+import 'package:smartshop/screen/users/signup/signupscreen.dart';
+import 'package:smartshop/screen/welcom/welcomscreen.dart';
 import 'firebase_options.dart';
 import 'package:flutter/material.dart';
-import 'package:smartshop/screen/homepage.dart';
+import 'package:smartshop/screen/homescreen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -27,12 +31,14 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         routes: {
-          /*  "signup": (context) => SignUpPage(),
-        "login": (context) => LoginPage(),*/
+          "splash": (context) => const SplashScreen(),
+          "welcome": (context) => const Welcomscreen(),
+          "signup": (context) => const SignUpScreen(),
+          "login": (context) => const LoginPage(),
           "homepage": (context) => const HomePage(),
           "cart": (context) => const CartScreen(),
         },
-        home: const HomePage(),
+        home: const SignUpScreen(),
       ),
     );
   }

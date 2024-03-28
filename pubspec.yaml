@@ -45,6 +45,13 @@ dependencies:
   provider: ^6.1.2
   uuid: ^3.0.7
   pretty_qr_code: ^3.3.0
+  flutter_animate: ^4.2.0+1
+  hexcolor: ^3.0.1
+  camera: ^0.10.5+9
+  path_provider: ^2.1.2
+  path: ^1.8.3
+  image_picker: ^1.0.7
+  
 
 dev_dependencies:
   flutter_test:
