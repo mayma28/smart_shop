@@ -8,6 +8,7 @@ class CartProvider with ChangeNotifier {
 
   List<CartModel> get cartItems => _cartItems;
 
+
   void add(ProductModel product, int quantity) {
     // Check if the product already exists in the cart
     int index =

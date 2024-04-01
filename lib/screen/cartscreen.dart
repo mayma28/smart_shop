@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smartshop/screen/historicscreen.dart';
 import 'package:smartshop/screen/qr_code.dart';
 
 import '../provider/cart_prov.dart';
@@ -57,7 +58,7 @@ class _CartScreenState extends State<CartScreen> {
                       onPressed: () => {},
                     ),
                     Padding(
-                      padding: EdgeInsets.only(right: 10),
+                      padding: const EdgeInsets.only(right: 10),
                       child: Consumer<CartProvider>(
                         builder: (context, cart, child) {
                           return Text("${cart.count}");
@@ -83,8 +84,8 @@ class _CartScreenState extends State<CartScreen> {
             Column(
               children: [
                 Container(
-                  margin: EdgeInsets.symmetric(vertical: 5),
-                  padding: EdgeInsets.all(10),
+                  margin: const EdgeInsets.symmetric(vertical: 5),
+                  padding: const EdgeInsets.all(10),
                   height: 350,
                   width: MediaQuery.of(context).size.width,
                   decoration:
@@ -104,7 +105,7 @@ class _CartScreenState extends State<CartScreen> {
                           : ListView.builder(
                               physics: const AlwaysScrollableScrollPhysics(),
                               scrollDirection: Axis.vertical,
-                              padding: EdgeInsets.symmetric(vertical: 8),
+                              padding: const EdgeInsets.symmetric(vertical: 8),
                               itemCount: cart.cartItem.length,
                               itemBuilder: (context, i) {
                                 return Column(
@@ -168,29 +169,46 @@ class _CartScreenState extends State<CartScreen> {
                   endIndent: Checkbox.width,
                 ),
                 Container(
-                  padding: EdgeInsets.all(10),
+                  padding: const EdgeInsets.only(left: 18),
                   child: Consumer<CartProvider>(
                     builder: (context, cart, child) {
                       return Row(
-                        // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
-                            "Prix totale = ",
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 18,
-                            ),
+                          Row(
+                            children: [
+                              const Text(
+                                "Prix totale = ",
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 18,
+                                ),
+                              ),
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              Text(
+                                "${cart.totalprice.toStringAsFixed(3)} DT",
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                  fontSize: 22,
+                                ),
+                              ),
+                            ],
                           ),
-                          SizedBox(
-                            width: 10,
-                          ),
-                          Text(
-                            "${cart.totalprice.toStringAsFixed(3)} DT",
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
-                              fontSize: 22,
-                            ),
+                          IconButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) {
+                                    return const HistoricScreen();
+                                  },
+                                ),
+                              );
+                            },
+                            icon: Icon(Icons.history),
                           ),
                         ],
                       );
@@ -203,7 +221,7 @@ class _CartScreenState extends State<CartScreen> {
                   width: MediaQuery.of(context).size.width / 3,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
-                    color: Color(0xffd9d9d9),
+                    color: const Color(0xffd9d9d9),
                   ),
                   child: MaterialButton(
                     onPressed: () {
@@ -211,7 +229,7 @@ class _CartScreenState extends State<CartScreen> {
                         context,
                         MaterialPageRoute(
                           builder: (context) {
-                            return QRCodePage();
+                            return const QRCodePage();
                           },
                         ),
                       );
