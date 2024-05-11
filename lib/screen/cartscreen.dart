@@ -1,11 +1,11 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:smartshop/screen/historicscreen.dart';
-import 'package:smartshop/screen/qr_code.dart';
+import 'package:smartshop/models/product_model.dart';
+import 'package:smartshop/screen/qr_codescreen.dart';
+import 'package:smartshop/ui/app_bar.dart';
+import 'package:smartshop/ui/app_bottom_nav_bar.dart';
 
 import '../provider/cart_prov.dart';
-import 'homescreen.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({
@@ -18,7 +18,13 @@ class CartScreen extends StatefulWidget {
 
 class _CartScreenState extends State<CartScreen> {
   int quantity = 1;
-
+  ProductModel? scannedProduct;
+// Callback function to receive scanned product data
+  void onProductScanned(ProductModel? product) {
+    setState(() {
+      scannedProduct = product;
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,42 +39,12 @@ class _CartScreenState extends State<CartScreen> {
           ),
         ),
       ),
+      bottomNavigationBar: AppBottomNavBar(),
       body: SingleChildScrollView(
         physics: const NeverScrollableScrollPhysics(),
         child: Column(
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.person_2_sharp, size: 37),
-                ),
-                const SizedBox(
-                  height: 60,
-                  width: 110,
-                  child: Image(
-                    image: AssetImage('assets/images/logo.png'),
-                  ),
-                ),
-                Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.shopping_cart_outlined, size: 37),
-                      onPressed: () => {},
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(right: 10),
-                      child: Consumer<CartProvider>(
-                        builder: (context, cart, child) {
-                          return Text("${cart.count}");
-                        },
-                      ),
-                    )
-                  ],
-                ),
-              ],
-            ),
+            AppBaar(),
             const SizedBox(
               height: 30,
             ),
@@ -91,8 +67,7 @@ class _CartScreenState extends State<CartScreen> {
                   decoration:
                       BoxDecoration(borderRadius: BorderRadius.circular(10)),
                   child: Consumer<CartProvider>(
-                      builder: (context, cart, child) => cart.cartItem.length ==
-                              0
+                      builder: (context, cart, child) => cart.cartItem.isEmpty
                           ? const Center(
                               child: Text(
                                 "Votre panier est vide",
@@ -125,7 +100,7 @@ class _CartScreenState extends State<CartScreen> {
                                         ),
                                       ),
                                       subtitle: Text(
-                                        "Price: ${cart.cartItem[i].price} DT",
+                                        "Prix: ${cart.cartItem[i].price} DT",
                                         style: const TextStyle(
                                           color: Colors.black,
                                         ),
@@ -169,53 +144,35 @@ class _CartScreenState extends State<CartScreen> {
                   endIndent: Checkbox.width,
                 ),
                 Container(
-                  padding: const EdgeInsets.only(left: 18),
+                  padding: const EdgeInsets.only(left: 18, top: 8),
                   child: Consumer<CartProvider>(
                     builder: (context, cart, child) {
                       return Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Row(
-                            children: [
-                              const Text(
-                                "Prix totale = ",
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 18,
-                                ),
-                              ),
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              Text(
-                                "${cart.totalprice.toStringAsFixed(3)} DT",
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                  fontSize: 22,
-                                ),
-                              ),
-                            ],
+                          const Text(
+                            "Prix totale =",
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 18,
+                            ),
                           ),
-                          IconButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) {
-                                    return const HistoricScreen();
-                                  },
-                                ),
-                              );
-                            },
-                            icon: Icon(Icons.history),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Text(
+                            "${cart.totalprice.toStringAsFixed(3)} DT",
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                              fontSize: 22,
+                            ),
                           ),
                         ],
                       );
                     },
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 25),
                 Container(
                   height: 43,
                   width: MediaQuery.of(context).size.width / 3,
@@ -246,70 +203,6 @@ class _CartScreenState extends State<CartScreen> {
                   ),
                 ),
                 const SizedBox(height: 13),
-              ],
-            ),
-            Column(
-              children: [
-                Container(
-                  height: 50,
-                  width: 270,
-                  decoration: const BoxDecoration(
-                    color: Color(0xff0e3baf),
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(10),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      IconButton(
-                        onPressed: () => {},
-                        icon: const Icon(Icons.barcode_reader,
-                            color: Colors.white, size: 35),
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          Navigator.push(context,
-                              MaterialPageRoute(builder: (context) {
-                            return const HomePage();
-                          }));
-                        },
-                        icon: const Icon(
-                          Icons.home,
-                          color: Colors.white,
-                          size: 35,
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () {},
-                        icon: const Icon(Icons.settings,
-                            color: Colors.white, size: 35),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(
-                  height: 15,
-                ),
-                Container(
-                  height: 60,
-                  decoration: const BoxDecoration(
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(30),
-                      topRight: Radius.circular(30),
-                    ),
-                    color: Color(0xfff7a644),
-                  ),
-                  child: const Positioned(
-                    bottom: 50,
-                    right: 25,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [],
-                    ),
-                  ),
-                ),
               ],
             ),
           ],

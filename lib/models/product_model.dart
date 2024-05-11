@@ -12,14 +12,12 @@ class ProductModel {
   });
 
   ProductModel.fromJson(Map<String, dynamic> json) {
-    
     name = json["name"];
     image = json["image"];
     price = json["price"];
   }
   Map<String, dynamic> toMap() {
     return {
-      
       'image': image,
       'name': name,
       'price': price,

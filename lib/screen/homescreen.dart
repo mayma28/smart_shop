@@ -1,20 +1,26 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:molten_navigationbar_flutter/molten_navigationbar_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:smartshop/provider/cart_prov.dart';
-import 'package:smartshop/screen/cartscreen.dart';
+import 'package:smartshop/screen/history/historicscreen.dart';
+import 'package:smartshop/ui/app_bar.dart';
 import 'package:smartshop/utils/colors.dart';
 import '../models/product_model.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({
+    Key? key,
+  }) : super(key: key);
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomeScreenState extends State<HomeScreen> {
+  int _selectedIndex = 0;
+  ProductModel? scannedProduct;
   ProductModel? productModel;
   List<ProductModel> items = [];
 
@@ -71,49 +77,65 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
+      bottomNavigationBar: MoltenBottomNavigationBar(
+        selectedIndex: _selectedIndex,
+        domeCircleColor: Color(0xfffac49b),
+        barColor: GlobalColors.AppBarColor,
+        domeHeight: 16,
+        domeCircleSize: 65,
+        borderRaduis: BorderRadius.only(
+          topLeft: Radius.circular(30),
+          topRight: Radius.circular(30),
+        ),
+        tabs: [
+          MoltenTab(
+            icon: Icon(Icons.home,
+                color: _selectedIndex == 0 ? Color(0xff1640af) : Colors.white,
+                size: 45),
+          ),
+          MoltenTab(
+            icon: Icon(Icons.qr_code_scanner_outlined,
+                color: _selectedIndex == 1 ? Color(0xff1640af) : Colors.white,
+                size: 45),
+          ),
+          MoltenTab(
+            icon: Icon(Icons.history_outlined,
+                color: _selectedIndex == 2 ? Color(0xff1640af) : Colors.white,
+                size: 45),
+          ),
+        ],
+        onTabChange: (clickedIndex) {
+          if (clickedIndex == 0) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => HomeScreen(),
+              ),
+            );
+          } else if (clickedIndex == 1) {
+            // Check if the QR code scanner icon is clicked
+            _scanBarcode();
+            // Call the _scanBarcode() function
+          } else {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => HistoricScreen(),
+              ),
+            );
+          }
+          setState(
+            () {
+              _selectedIndex = clickedIndex;
+            },
+          );
+        },
+      ),
       body: SingleChildScrollView(
         physics: const NeverScrollableScrollPhysics(),
         child: Column(
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.person_2_sharp, size: 37),
-                ),
-                const SizedBox(
-                  height: 60,
-                  width: 110,
-                  child: Image(
-                    image: AssetImage('assets/images/logo.png'),
-                  ),
-                ),
-                Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.local_mall, size: 37),
-                      onPressed: () => {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) {
-                              return const CartScreen();
-                            },
-                          ),
-                        )
-                      },
-                    ),
-                    Padding(
-                        padding: const EdgeInsets.only(right: 10),
-                        child: Consumer<CartProvider>(
-                          builder: (context, cart, child) {
-                            return Text("${cart.count}");
-                          },
-                        ))
-                  ],
-                ),
-              ],
-            ),
+            const AppBaar(),
             const SizedBox(
               height: 30,
             ),
@@ -205,64 +227,6 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ),
                       ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              margin: const EdgeInsets.symmetric(vertical: 176.0),
-              child: Column(
-                children: [
-                  Container(
-                    height: 50,
-                    width: 270,
-                    decoration: const BoxDecoration(
-                      color: Color(0xff0e3baf),
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(10),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        IconButton(
-                          onPressed: () => _scanBarcode(),
-                          icon: const Icon(Icons.barcode_reader,
-                              color: Colors.white, size: 35),
-                        ),
-                        IconButton(
-                          onPressed: () => const HomePage(),
-                          icon: const Icon(
-                            Icons.home,
-                            color: Colors.white,
-                            size: 35,
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: _scanBarcode,
-                          icon: const Icon(Icons.settings,
-                              color: Colors.white, size: 35),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 25,
-                  ),
-                  Container(
-                    height: 60,
-                    decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(30),
-                        topRight: Radius.circular(30),
-                      ),
-                      color: GlobalColors.AppBarColor,
-                    ),
-                    child: const Positioned(
-                      bottom: 50,
-                      right: 25,
-                      child: Row(),
                     ),
                   ),
                 ],
