@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
 import 'package:provider/provider.dart';
-import 'package:smartshop/models/product_model.dart';
-import 'package:smartshop/ui/app_bar.dart';
-import 'package:smartshop/ui/app_bottom_nav_bar.dart';
-
+import 'package:smartshop/models/cart_model.dart';
+import 'package:smartshop/utils/widgets/app_bar.dart';
+import 'package:smartshop/utils/widgets/app_bottom_nav_bar.dart';
+import 'package:smartshop/utils/widgets/scaffold_app_bar.dart';
 import '../provider/cart_prov.dart';
+import '../utils/widgets/drawer.dart';
 
 class QRCodePage extends StatefulWidget {
   const QRCodePage({super.key});
@@ -15,34 +17,23 @@ class QRCodePage extends StatefulWidget {
 }
 
 class _QRCodePageState extends State<QRCodePage> {
-  ProductModel? scannedProduct;
-// Callback function to receive scanned product data
-  void onProductScanned(ProductModel? product) {
-    setState(() {
-      scannedProduct = product;
-    });
-  }
-
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(50),
-        child: Container(
-          decoration: const BoxDecoration(
-            color: Color(0xfff7a644),
-            borderRadius: BorderRadius.vertical(
-              bottom: Radius.circular(30),
-            ),
-          ),
-        ),
+      appBar: showAppBar(),
+      key: _scaffoldKey,
+      drawer: showDrawer(),
+      bottomNavigationBar: AppBottomNavBar(
+        selectedIndex: 0,
       ),
-      bottomNavigationBar: AppBottomNavBar(),
       body: SingleChildScrollView(
         physics: const NeverScrollableScrollPhysics(),
         child: Column(
           children: [
-            AppBaar(),
+            AppBaar(
+              scaffoldKey: _scaffoldKey,
+            ),
             const SizedBox(
               height: 30,
             ),
@@ -56,7 +47,6 @@ class _QRCodePageState extends State<QRCodePage> {
             ),
             const SizedBox(height: 50),
             Container(
-              // margin: const EdgeInsets.symmetric(vertical: 5),
               padding: const EdgeInsets.only(left: 8),
               height: 300,
               width: MediaQuery.of(context).size.width,
@@ -64,23 +54,24 @@ class _QRCodePageState extends State<QRCodePage> {
                   BoxDecoration(borderRadius: BorderRadius.circular(10)),
               child: Consumer<CartProvider>(
                 builder: (context, cart, child) {
-                  return ListView.builder(
-                    itemCount: cart.cartItem
-                        .length, // Set itemCount to 1 as we only have one PrettyQr widget
-                    itemBuilder: (context, i) {
-                      return Center(
-                        child: PrettyQr(
-                          data:
-                              "Nom de produit: ${cart.cartItem[i].name}, Prix: ${cart.cartItem[i].price} DT",
-                          size: 250,
-                        ),
-                      );
-                    },
+                  String data = "Nom des produits: \n";
+                  for (CartModel item in cart.cartItems) {
+                    data +=
+                        "- ${item.productModel.name}, , ${item.quantity} piéces \n, Prix: ${item.productModel.price} DT";
+                  }
+                  NumberFormat formatter = NumberFormat('##0.00');
+
+                  data +=
+                      "Prix totale: ${formatter.format(cart.totalprice)} DT";
+                  return Center(
+                    child: PrettyQr(
+                      data: data,
+                      size: 250,
+                    ),
                   );
                 },
               ),
             ),
-            // const SizedBox(height: 50),
             Column(
               children: [
                 const Divider(
@@ -94,7 +85,6 @@ class _QRCodePageState extends State<QRCodePage> {
                   child: Consumer<CartProvider>(
                     builder: (context, cart, child) {
                       return Row(
-                        // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text(
                             "Prix totale =",

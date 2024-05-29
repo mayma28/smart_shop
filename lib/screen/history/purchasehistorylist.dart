@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:smartshop/screen/purchase_cart.dart';
+import 'package:smartshop/services/authentication.dart';
 
 class PurchaseHistoryList extends StatefulWidget {
   const PurchaseHistoryList({Key? key}) : super(key: key);
@@ -9,31 +11,72 @@ class PurchaseHistoryList extends StatefulWidget {
 }
 
 class _PurchaseHistoryListState extends State<PurchaseHistoryList> {
+  String userID = "";
+  @override
+  void initState() {
+    userID = AuthServices().getUser()!.uid;
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance.collection('purchases').snapshots(),
+    return FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+      future:
+          FirebaseFirestore.instance.collection('history').doc(userID).get(),
       builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return CircularProgressIndicator(); // Show a loading indicator if data is not yet available
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Padding(
+            padding: EdgeInsets.all(30.0),
+            child: CircularProgressIndicator(),
+          );
         }
-        final purchases = snapshot.data!.docs;
-        return ListView.builder(
-          itemCount: purchases.length,
-          itemBuilder: (context, index) {
-            final purchase = purchases[index];
-            final productName = purchase['product Name'];
-            final price = purchase['price'];
-            final quantity = purchase['quantity'];
-            final timestamp = purchase['timestamp'];
-            return ListTile(
-              title: Text(productName),
-              subtitle: Text(
-                  'Price: ${price.toStringAsFixed(2)} DT | Quantity: $quantity'),
-              trailing: Text(timestamp.toDate().toString()),
-            );
-          },
-        );
+        final data = snapshot.data!.data();
+        if (data == null) {
+          return const Center(
+              child: Text(
+            "Vous n'avez pas des achats",
+            style: TextStyle(fontSize: 18),
+          ));
+        } else {
+          final history = data['history'] as List<dynamic>;
+          return ListView.builder(
+            itemCount: history.length,
+            itemBuilder: (context, index) {
+              Map purchase = history[history.length-index-1];
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => PurchaseCartScreen(
+                        purchase: purchase,
+                      ),
+                    ),
+                  );
+                },
+                child: Container(
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                  width: double.infinity,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(255, 163, 163, 163),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Center(
+                    child: Text(
+                      '${purchase['date']}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          );
+        }
       },
     );
   }

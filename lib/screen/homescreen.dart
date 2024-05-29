@@ -5,14 +5,18 @@ import 'package:molten_navigationbar_flutter/molten_navigationbar_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:smartshop/provider/cart_prov.dart';
 import 'package:smartshop/screen/history/historicscreen.dart';
-import 'package:smartshop/ui/app_bar.dart';
-import 'package:smartshop/utils/colors.dart';
+import 'package:smartshop/utils/widgets/app_bar.dart';
+import 'package:smartshop/utils/theme/colors.dart';
+import 'package:smartshop/utils/widgets/scaffold_app_bar.dart';
+import 'package:smartshop/utils/widgets/suggested_products.dart';
 import '../models/product_model.dart';
+import '../utils/widgets/alert_snack_bar.dart';
+import '../utils/widgets/drawer.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -22,7 +26,9 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   ProductModel? scannedProduct;
   ProductModel? productModel;
+  String? productID;
   List<ProductModel> items = [];
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   Future<void> _scanBarcode() async {
     try {
@@ -32,86 +38,169 @@ class _HomeScreenState extends State<HomeScreen> {
         true,
         ScanMode.BARCODE,
       );
-      setState(() {});
-      getData(barcodeResult: barcodeResult);
+      await getData(barcodeResult: barcodeResult);
     } catch (e) {
       // Handle error
       print('Error in _scanBarcode: $e');
     }
   }
 
-  void getData({required String barcodeResult}) async {
-    // Retrieve data from the 'produits' collection with a document ID equal to barcodeResult
-    await FirebaseFirestore.instance
-        .collection('produits')
-        .doc(barcodeResult)
-        .get()
-
-        // Once data is retrieved, convert it to a ProductModel object
-        .then((value) {
+  Future getData({required String barcodeResult}) async {
+    print(barcodeResult);
+    try {
+      final value = await FirebaseFirestore.instance
+          .collection('produits')
+          .doc(barcodeResult)
+          .get();
       if (value.exists) {
         setState(() {
           productModel = ProductModel.fromJson(value.data()!);
-          print(productModel!.name);
+          productID=barcodeResult;
         });
       } else {
         setState(() {
-          productModel = null; // Reset productModel to null if not found
+          productModel = null;
+          productID=null;
         });
         print('Product not found');
+        showErrorSnackBar(context, "Produits invalide");
       }
-    });
+    } catch (e) {}
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(50),
-        child: Container(
-          decoration: const BoxDecoration(
-            color: Color(0xfff7a644),
-            borderRadius: BorderRadius.vertical(
-              bottom: Radius.circular(30),
+      appBar: showAppBar(),
+      key: _scaffoldKey,
+      drawer: const showDrawer(),
+      body: SingleChildScrollView(
+        physics: const NeverScrollableScrollPhysics(),
+        child: Column(
+          children: [
+            AppBaar(
+              scaffoldKey: _scaffoldKey,
             ),
-          ),
+            const SizedBox(height: 30),
+            const Text(
+              'Scanner le code de produits que vous\n voulez acheter.',
+              style: TextStyle(
+                fontSize: 20,
+                fontStyle: FontStyle.italic,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 20),
+            if (productModel == null) const SizedBox(height: 50),
+            productModel != null
+                ? SizedBox(
+                    child: Card(
+                      child: Consumer<CartProvider>(
+                        builder: (context, cart, child) {
+                          return Column(
+                            children: [
+                              Image.network(productModel!.image, height: 200),
+                              Text.rich(
+                                TextSpan(
+                                  children: [
+                                    const TextSpan(
+                                      text: 'Nom : ',
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        fontStyle: FontStyle.italic,
+                                      ),
+                                    ),
+                                    TextSpan(
+                                        style: const TextStyle(
+                                          fontSize: 20,
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                        text: productModel!
+                                            .name), // Add null check
+                                  ],
+                                ),
+                              ),
+                              Text.rich(
+                                TextSpan(
+                                  children: [
+                                    const TextSpan(
+                                      text: 'Prix : ',
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        fontStyle: FontStyle.italic,
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      style: const TextStyle(
+                                        fontSize: 20,
+                                        fontStyle: FontStyle.italic,
+                                      ),
+                                      text: productModel!.price.toString(),
+                                    ), // Add null check
+                                  ],
+                                ),
+                              ),
+                              Column(
+                                children: [
+                                  Container(
+                                    alignment: Alignment.bottomRight,
+                                    child: IconButton(
+                                      onPressed: () => {
+                                        Provider.of<CartProvider>(context,
+                                                listen: false)
+                                            .add(productID!, 1)
+                                      },
+                                      icon: const Icon(
+                                          Icons.add_shopping_cart_outlined),
+                                    ),
+                                  ),
+                                ],
+                              )
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                  )
+                : const MySuggestedProducts(),
+          ],
         ),
       ),
       bottomNavigationBar: MoltenBottomNavigationBar(
         selectedIndex: _selectedIndex,
-        domeCircleColor: Color(0xfffac49b),
+        domeCircleColor: const Color(0xfffac49b),
         barColor: GlobalColors.AppBarColor,
         domeHeight: 16,
         domeCircleSize: 65,
-        borderRaduis: BorderRadius.only(
+        borderRaduis: const BorderRadius.only(
           topLeft: Radius.circular(30),
           topRight: Radius.circular(30),
         ),
         tabs: [
           MoltenTab(
             icon: Icon(Icons.home,
-                color: _selectedIndex == 0 ? Color(0xff1640af) : Colors.white,
+                color: _selectedIndex == 0
+                    ? const Color(0xff1640af)
+                    : Colors.white,
                 size: 45),
           ),
           MoltenTab(
             icon: Icon(Icons.qr_code_scanner_outlined,
-                color: _selectedIndex == 1 ? Color(0xff1640af) : Colors.white,
+                color: _selectedIndex == 1
+                    ? const Color(0xff1640af)
+                    : Colors.white,
                 size: 45),
           ),
           MoltenTab(
             icon: Icon(Icons.history_outlined,
-                color: _selectedIndex == 2 ? Color(0xff1640af) : Colors.white,
+                color: _selectedIndex == 2
+                    ? const Color(0xff1640af)
+                    : Colors.white,
                 size: 45),
           ),
         ],
         onTabChange: (clickedIndex) {
           if (clickedIndex == 0) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => HomeScreen(),
-              ),
-            );
           } else if (clickedIndex == 1) {
             // Check if the QR code scanner icon is clicked
             _scanBarcode();
@@ -120,7 +209,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => HistoricScreen(),
+                builder: (context) => const HistoricScreen(),
               ),
             );
           }
@@ -130,110 +219,6 @@ class _HomeScreenState extends State<HomeScreen> {
             },
           );
         },
-      ),
-      body: SingleChildScrollView(
-        physics: const NeverScrollableScrollPhysics(),
-        child: Column(
-          children: [
-            const AppBaar(),
-            const SizedBox(
-              height: 30,
-            ),
-            const Text(
-              'Scanner le code de produits que vous\n voulez acheter.',
-              style: TextStyle(
-                fontSize: 20,
-                fontStyle: FontStyle.italic,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Center(
-              child: Column(
-                children: [
-                  SizedBox(
-                    height: 295,
-                    child: GridView.count(
-                      crossAxisCount: 1,
-                      children: <Widget>[
-                        if (productModel != null)
-                          Card(
-                            child: Consumer<CartProvider>(
-                              builder: (context, cart, child) {
-                                return Column(
-                                  children: [
-                                    Image.network(productModel!.image!,
-                                        height: 200),
-                                    Text.rich(
-                                      TextSpan(
-                                        children: [
-                                          const TextSpan(
-                                            text: 'Nom : ',
-                                            style: TextStyle(
-                                              fontSize: 20,
-                                              fontStyle: FontStyle.italic,
-                                            ),
-                                          ),
-                                          TextSpan(
-                                              style: const TextStyle(
-                                                fontSize: 20,
-                                                fontStyle: FontStyle.italic,
-                                              ),
-                                              text: productModel!
-                                                  .name!), // Add null check
-                                        ],
-                                      ),
-                                    ),
-                                    Text.rich(
-                                      TextSpan(
-                                        children: [
-                                          const TextSpan(
-                                            text: 'Prix : ',
-                                            style: TextStyle(
-                                              fontSize: 20,
-                                              fontStyle: FontStyle.italic,
-                                            ),
-                                          ),
-                                          TextSpan(
-                                            style: const TextStyle(
-                                              fontSize: 20,
-                                              fontStyle: FontStyle.italic,
-                                            ),
-                                            text:
-                                                productModel!.price!.toString(),
-                                          ), // Add null check
-                                        ],
-                                      ),
-                                    ),
-                                    Column(
-                                      children: [
-                                        Container(
-                                          alignment: Alignment.bottomRight,
-                                          child: IconButton(
-                                            onPressed: () => {
-                                              Provider.of<CartProvider>(context,
-                                                      listen: false)
-                                                  .add(productModel!, 1)
-                                            },
-                                            icon: const Icon(Icons
-                                                .add_shopping_cart_outlined),
-                                          ),
-                                        ),
-                                      ],
-                                    )
-                                  ],
-                                );
-                              },
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
